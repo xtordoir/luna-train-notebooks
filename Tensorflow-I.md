@@ -21,7 +21,7 @@ Create a new notebook (`python3` kernel), add the required imports:
 import tensorflow as tf
 ```
 
-## 2. Create a session with simple operations
+## 2. Create a session with simple operations: Rank 0 Tensor shape
 
 We start a tensorflow session, create a constant and print the shape as defined by tensorflow (`tf.shape`) and the numpy shape applied to underlying tensor value.
 
@@ -39,8 +39,26 @@ Tensor("Shape:0", shape=(0,), dtype=int32)
 ()
 ```
 
-The first line is a Tensor defining the shape with id `Shape:0`, it is a tensor of rank 0 (`scalar` value).
+The first line is showing the `tf.shape` output type, a Tensor defining the shape. This tensor has an id `Shape:0`, it is a tensor of rank 0 (`scalar` value). At this stage, the tensor is not evaluated, only the operation to create the result is defined.
+
+The second line is the shape of the value in the tensor, as numpy defines it, it is an empty tuple for a scalar (no index is needed to find an element).
+
+#### Note:
+
+As a preview, you can "compute" and transform the Tensor value in a numpy array with the function `eval()`:
+
+```
+    input0_shape = tf.shape(input0)
+    print(input_shape0.eval())
+```
+
+Returning:
+```
+[]
+```
  
+An empty numpy array, equivalent to the empy tuple for the numpy shape.
+
 ## 3. Explore Higher Rank tensor shapes
  
  Create tensors (`tf.constant()`) and display shapes of arrays and multidimensional arrays:
@@ -76,7 +94,7 @@ B.shape
 ```
 Then use these as in previous shape display examples...
 
-## 5. Simple operations (+, x), evaluation
+## 5. Simple operations (+, x, @), evaluation
 
 Initialise some constants:
 $$
@@ -116,6 +134,14 @@ with tf.Session():
 
 `eval()` is triggering actual computation of the sum and conversion to numpy array (try and print `type(su.eval())`).
 
+#### Exercise:
+
+As a reminder of matrix multiplication, us the `@`operator (or `tf.matmul()` function) to compute `X.Y`.
+
+Also, create a column vector and a row vector, represented and rank-2 tensors and compute both matrix products (`A.B`and `B.A`), loo,k at the resulting tensors shapes.
+
+Review matrix product as needed! Why are vectors and scalars represented as rank-2 tensors?
+
 ## 6. Random matrices
 
 Tensors representing a model parameters (vectors, matrices etc) are often initialized with random values before learning of the parameters is actually done.
@@ -141,7 +167,7 @@ Result should look like:
 
 ![alt text](img/unisparse.png "uniformsparse")
 
-Try with a 100 elements.
+Try with 100 elements.
 
 ## 7. Variables and loop updates
 
@@ -210,17 +236,23 @@ Where \\(\omega\\) is a matrix, \\(x\\) is the data vector (features), and \\(b\
 
 #### Exercise:
 
-Create a Constant tensor `x` of rank 1 (3 elements), initialize with some values in the range [0.0, 1.0].
+Create a Constant tensor `x` representing a 3 elements row vector, initialize with some values in the range [0.0, 1.0].
 
-Create a variable `b` of rank 0 (scalar), and initialize with random values (`random_normal`).
+Create a variable `b` containing single value, and initialize with random values (`random_normal`).
 
-Create a variable `weights` of rank 1 (3 elements), and initialize with random values (`random_normal`).
+Create a variable `weights` as a 3 elements column vector, and initialize with random values (`random_normal`).
 
-Define a predict operation as the result of \\(y = \omega x+b\\)
+Define a predict operation as the result of \\(y =  x.\omega^{T}+b\\)
 
 Print the predict output.
 
 This is the first introduction to basic usage of tensorflow including a preparation for Linear Model definition.
+
+##### exercise:
+
+Change `x` to contain serval input samples, i.e. each row is on input sample with 3 columns.
+
+For example 10 samples. Get the corresponding 10 predictions.
 
 ## 9. Tensorboard Graph visualisation
 
@@ -296,7 +328,6 @@ filename = "/tmp/dummy.txt"
 
 with open(filename) as lines:
     for line in lines:
-        x = line.strip().float()
-        
+        x = float(line.strip())        
 ```
 

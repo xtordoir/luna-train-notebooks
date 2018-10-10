@@ -105,19 +105,19 @@ No bias to start with.
 
 ### Predictions and loss
 
-Predictions are given by \\( \hat{y} = x \omega \\)
+Predictions are given by \\( \hat{y} = x .\omega \\)
 
-And by \\( {y - \hat{y}} \\)
+And by \\( {\hat{y} - y} \\)
 
 ```
     yhat = x @ weights
-    yerror = tf.subtract(y, yhat)
+    yerror = tf.subtract(yhat, y)
 ```
 
 The loss is the squared sum of prediction errors
 
 ```
-    loss = tf.reduce_sum(tf.multiply(yerror, yerror))
+    loss = 0.5 * tf.reduce_sum(tf.multiply(yerror, yerror))
 ```
 
 Before any optimisation, compute and display the loss and weights:
@@ -138,7 +138,7 @@ Obviously, without optimisation of weights, predictions ar far from actual value
 
 ```
     plt.plot(range(y.eval().shape[0]), y.eval(), 'g-', range(y.eval().shape[0]), yhat.eval(), 'b-')
-    plt.plot(yerror, 'r-')
+    plt.plot(yerror.eval(), 'r-')
 ```
 
 #### Exercise:
@@ -194,7 +194,7 @@ Loss = \frac{1}{2}\sum{(\hat{y}-y)^2}
 $$
 
 ```
-    yerror = tf.subtract(y, yhat)
+    yerror = tf.subtract(yhat, y)
     loss = 0.5 * tf.reduce_sum(tf.multiply(yerror, yerror))
 
 ```
@@ -216,11 +216,39 @@ $$
 ```
     update_weights = tf.assign_sub(weights, learning_rate * gradient)
 ```
+
 #### Exercise:
 
-Put it all together, run a number of iterations, choose a learning parameter, a see if you can get convergence.
+Compute the gradient (`gradients` list)at each step and plot the gradients along with the loss, see where the gradient becomes 0. Plot using the following instructions to get 2 axis:
 
-Plot evolution of loss in the learning process.
+```
+  fig, ax1 = plt.subplots()
+  color = 'tab:red'
+  ax1.set_xlabel('weight')
+  ax1.set_ylabel('Loss', color=color)
+  ax1.plot(ws, losses, color=color)
+  ax1.tick_params(axis='y', labelcolor=color)
+  
+  ax2 = ax1.twinx()
+  color = 'tab:blue'
+  ax2.set_ylabel('Gradient', color=color) 
+  ax2.plot(ws, gradients, color=color)
+  ax2.tick_params(axis='y', labelcolor=color)
+  fig.tight_layout()
+```
+
+![alt text](img/loss-grad.png "losses")
+
+
+#### Exercise:
+
+Put it all together, run a number of iterations, choose a learning parameter, use the `update_weights` operation using gradient, and see if you can get convergence.
+
+Plot evolution of loss/gradient in the learning process.
+
+![alt text](img/stochastic-weight.png "losses")
+
+
 
 ### Gradient Descent (`GradientDescentOptimizer`)
 
