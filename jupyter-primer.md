@@ -26,7 +26,7 @@
 
 #### 1. Open the Jupyter server in a Browser:
 
-http://xxxxx:8888
+[http://xxxxx:8888]()
 
 Where xxx is your assigned machine name
 

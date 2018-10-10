@@ -254,7 +254,7 @@ Plot evolution of loss/gradient in the learning process.
 
 Tensorflow provides classes to provide loss functions like L2:
 
-https://www.tensorflow.org/api_docs/python/tf/nn/l2_loss
+[https://www.tensorflow.org/api_docs/python/tf/nn/l2_loss]()
 
 ```
     loss = tf.nn.l2_loss(yerror)
@@ -262,7 +262,7 @@ https://www.tensorflow.org/api_docs/python/tf/nn/l2_loss
 
 and optimizers,  like `GradientDescentOptimizer`:
 
-https://www.tensorflow.org/api_docs/python/tf/train/GradientDescentOptimizer
+[https://www.tensorflow.org/api_docs/python/tf/train/GradientDescentOptimizer]()
 
 ```
     update_weights = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
@@ -272,5 +272,7 @@ These implementations are equivalent to the detailed one we has used before.
 
 #### Exercise:
 
-Adapt implementation to use the `tf.nn.l2_loss` operation and `tf.train.GradientDescentOptimizer`.
+Adapt implementation to use the `tf.nn.l2_loss` operation and `tf.train.GradientDescentOptimizer`. And add a bias (variable tensor `b` for \\(\hat{y}=x.\omega+b\\) ).
+
+Compare final loss with previous implementation (no bias).
 

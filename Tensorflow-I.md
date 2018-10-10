@@ -289,7 +289,7 @@ import tensorflow as tf
 
 Create a Placeholder named `x` to deal with a scalar float value (see `shape` and `dtype` parameters):
 
-https://www.tensorflow.org/api_docs/python/tf/placeholder
+[https://www.tensorflow.org/api_docs/python/tf/placeholder]()
 
 Define the operation `y = x * x` for scalar `x`.
 
