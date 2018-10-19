@@ -89,11 +89,11 @@ test=df.drop(train.index)
 
 Then we create the corresponding tensorflow variables:
 
-x_train, y_train
+`x_train`, `y_train`
 
 and
 
-x_test, y_test
+`x_test`,  `y_test`
 
 #### Exercise 
 
@@ -164,42 +164,34 @@ df = df.sort_values(by= 'date').reset_index(drop=True)
 df = df.drop(columns=['date', 'DWDP', 'MMM'])
 df.to_csv("/tmp/djia.csv", index=False)
 ```
+### Create a Datasetfrom text file list
 
-### Create a file queue and TextLineReader
-
-From a list of strings (file paths to process), we can create a queue to iterate on:
-
-```
-filename_queue = tf.train.string_input_producer(["/tmp/djia.csv"])
-```
-The `tf.TextLineReader` class is a Reader for text files, on line at a time:
+From a list of strings (file paths to process), we can create a DataSet to iterate on:
 
 ```
-reader = tf.TextLineReader(skip_header_lines = True)
+dataset = tf.data.TextLineDataset(["/tmp/djia.csv"])
+next_batch = dataset.make_one_shot_iterator().get_next()
 ```
 
-A `read` operation will return 2 elements: the filename and the line as sting:
-
-```
-key, value = reader.read(filename_queue)
-```
-
-In the Tensorflow session, we can feed the queue, and before ending the session, we need to close the queue:
-
+We ca then start a session to evaluate the iterator content:
 
 ```
 with tf.Session() as sess:
-    # Start populating the filename queue.
-    coord = tf.train.Coordinator()
-    threads = tf.train.start_queue_runners(coord=coord)
-    # do something here
-    
-    coord.request_stop()
+    print(next_batch.eval())
+    print(next_batch.eval())
 ```
 
-#### Exercise
+<pre>
+b'AAPL,AXP,BA,CAT,CSCO,CVX,DIS,GE,GS,HD,IBM,INTC,JNJ,JPM,KO,MCD,MRK,MSFT,NKE,PFE,PG,TRV,UNH,UTX,V,VZ,WMT,XOM'
+b'114.71537780152,74.16224571766,152.66844275663001,91.25808662690599,29.484965671049,114.38156665191002,105.28539325843,30.870473498417002,239.29823013253,131.9449566362,160.9398519008,35.391922524826995,112.92508726248998,85.302395106747,40.770394346462005,117.32181346847,58.853858943354,61.219141839548996,51.465478270011,31.756235679156,81.645970701032,120.23555081617586,159.58128575795,108.92922976027,79.081714790902,53.35930858124178,67.291215387444,87.56724123866199'
+</pre>
 
-In the session, run one read to print `key` and `value` 
+#### Exercise:
+
+Use the `skip` function on TextLineDataset to remove the header line.
+
+Use the `batch` function to group by 10 lines in one itaration.
+
 
 ### Decode the csv, construct feature/label
 `value`can be decoded as csv, using `tf.decode_csv`. It returns a list of tensors, and requires `record_defaults` as a python list for default values and types.
@@ -216,31 +208,57 @@ can be decoded with:
 decoded = tf.decode_csv(value, record_defaults = [[0.0], [0.0], [0.0]])
 ```
 
-Note the `record_defaults` structure.
+Note the `record_defaults` structure, giving the shape and types of decoded items.
 
 #### Exercise
 
 How to write a decoded for the djia.csv file?
 Hints to create `record_defaults`:
-- `np.full()` function
-- `ndarray.tolist` numpy function
+
+- `[[ ]] * 3` creates the nested list `[ [ ], [ ], [ ] ]`
 
 #### Exercise
 
-Write instruction to create `label` as the tensor containing `JPM` value (note that we reference columns with index, not name)
 
-Write instruction to create a `feature` as the tensor containing all but `JPM` values (use `tf.stack`).
+Write a function to decode a line and create a tensor *stacking* the different fields, first one being JPM:
+
+```
+def parse_csv(line):
+  ## TODO: implement in order to get a tensor stacking the list of 
+  ## prices, with JPM as first element
+  
+  all_cols = ???
+  return tf.stack(all_cols)
+```
+
+This function will be applied on the `dataset` via a `map`, then batching by 10 elements:
+
+```
+next_batch = dataset.map(parse_csv).batch(10).make_one_shot_iterator().get_next()
+```
+
+Write a transformation of `next_batch` to return a tuple `y_batch, x_batch` where `y_batch` contains the values of JPM, and `x_batch` the values of other stocks.
+
+Use the `tf.slice` function for this, result should look like this (here on a batch of size 1!):
+
+```
+with tf.Session() as sess:
+    #print(next_batch.eval())
+    x, y = sess.run([next_x, next_y])
+    print(y)
+    print(x)
+```
+
+```
+[[85.3024]]
+[[114.71538   74.16225  152.66844   91.25809   29.484966 114.38157
+  105.28539   30.870474 239.29823  131.94496  160.93985   35.391922
+  112.92509   40.770393 117.321815  58.85386   61.219143  51.465477
+   31.756235  81.64597  120.23555  159.58128  108.92923   79.08172
+   53.35931   67.291214  87.56724 ]]
+```
 
 ### Batch to update 
-
-The training procedure consists in updating parameters from data. Each iteration is using a (mini-)batch of data:
-
-```
-  example_batch, label_batch = tf.train.shuffle_batch(
-      [features, label], batch_size = 100, capacity=capacity,
-      min_after_dequeue=min_after_dequeue)
-      
-```
 
 Loop on 10 iterations, and check there are updated batches!
 
@@ -251,9 +269,20 @@ Left as exercise:
 - Train the model using these mini-batches (100 samples)
 
 ## 6. Estimator based implementation
+<span style="color: red"> TODO FULL DETAILED EXAMPLE OF MANAGING DATASET TO LINEARREGRESSOR USGE</span>
+Tensorflow provides the estimator API wrapping differents model actions:
 
-Left as exercise:
+- training
+- evaluation
+- predictions
+- saving 
+
+A LinearRegressor is implemented (see [https://www.tensorflow.org/api_docs/python/tf/estimator/LinearRegressor]()).
+
+Estimators separate data preparation pipelines from model training and use.
 
 Estimators provide a LinearModel implementation:
 
 https://www.tensorflow.org/api_docs/python/tf/estimator/LinearRegressor
+
+The LinearRegressor requires 
